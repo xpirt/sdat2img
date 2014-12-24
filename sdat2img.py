@@ -1,23 +1,29 @@
 #!/usr/bin/env python
 #encoding:utf8
-#===============================================================================
+#====================================================
 #          FILE: sdat2img.py
-#        AUTHOR: luxi78@gmail.com 
-#       CREATED: 2014年12月21日 15时25分15秒 CST
-#      REVISION:  ---
-#===============================================================================
-import sys
+#       AUTHORS: xpirt - luxi78 - howellzhu
+#          DATE: 2014-12-24 13:18:27 CST
+#====================================================
+import sys, os
 
-TRANSFER_LIST_FILE = 'system.transfer.list'
-NEW_DATA_FILE = 'system.new.dat'
-OUTPUT_IMAGE_FILE = 'system.img'
+try:
+    TRANSFER_LIST_FILE = str(sys.argv[1])
+    NEW_DATA_FILE = str(sys.argv[2])
+    OUTPUT_IMAGE_FILE = str(sys.argv[3])
+except IndexError:  
+   print ("\nsdat2img - usage is: \n\n      sdat2img sdat2img <transfer_list> <system_new_file> <system_img>\n\n")
+   print ("Visit xda thread for more information.\n")
+   os.system("pause")
+   sys.exit()
+
 BLOCK_SIZE = 4096
 
 def rangeset(src):
     src_set = src.split(',')
     num_set =  [int(item) for item in src_set]
     if len(num_set) != num_set[0]+1:
-        print 'Error for parsiing following data to rangeset:\n%s' % src
+        print ('Error on parsing following data to rangeset:\n%s' % src)
         sys.exit(1)
 
     return tuple ([ (num_set[i], num_set[i+1]) for i in range(1, len(num_set), 2) ])
@@ -35,7 +41,7 @@ def parse_transfer_list_file(path):
         elif 'new' == cmd:
             new_block_set = rangeset(line[1])
         else:
-            print 'Error command %s' % cmd
+            print ('Error command %s' % cmd)
             trans_list.close()
             sys.exit(1)
 
@@ -45,25 +51,25 @@ def parse_transfer_list_file(path):
 def init_output_file_size(output_file_obj, erase_block_set):
     max_block_num = max(pair[1] for pair in erase_block_set)
     output_file_obj.seek(max_block_num*BLOCK_SIZE - 1)
-    output_file_obj.write('\0')
+    output_file_obj.write('\0'.encode('utf-8'))
     output_file_obj.flush()
 
 def main(argv):
     version, new_blocks, erase_block_set, new_block_set =  parse_transfer_list_file(TRANSFER_LIST_FILE)
-    output_img = file( OUTPUT_IMAGE_FILE, 'wb')
+    output_img = open( OUTPUT_IMAGE_FILE, 'wb')
     init_output_file_size(output_img, erase_block_set)
-    new_data_file = file(NEW_DATA_FILE, 'rb')
-   
+    new_data_file = open(NEW_DATA_FILE, 'rb')
+
     for block in new_block_set:
         begin = block[0]
         end = block[1]
         block_count = end - begin
-        print "Reading %d blocks..." % block_count,
+        print ("Reading %d blocks..." % block_count),
         data = new_data_file.read(block_count*BLOCK_SIZE)
-        print "writing to %d..." % begin,
+        print ("Writing to %d..." % begin),
         output_img.seek(begin*BLOCK_SIZE)
         output_img.write(data)
-        print "finish!"
+        print ("Done!")
 
     output_img.close()
     new_data_file.close()
