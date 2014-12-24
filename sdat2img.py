@@ -12,7 +12,7 @@ try:
     NEW_DATA_FILE = str(sys.argv[2])
     OUTPUT_IMAGE_FILE = str(sys.argv[3])
 except IndexError:  
-   print ("\nsdat2img - usage is: \n\n      sdat2img sdat2img <transfer_list> <system_new_file> <system_img>\n\n")
+   print ("\nsdat2img - usage is: \n\n      sdat2img <transfer_list> <system_new_file> <system_img>\n\n")
    print ("Visit xda thread for more information.\n")
    os.system("pause")
    sys.exit()
