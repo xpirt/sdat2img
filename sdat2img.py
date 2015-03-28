@@ -3,7 +3,7 @@
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2014-12-24 13:18:27 CST
+#          DATE: 2015-03-28 14:51:44 CST
 #====================================================
 import sys, os
 
@@ -30,20 +30,28 @@ def rangeset(src):
 
 def parse_transfer_list_file(path):
     trans_list = open(TRANSFER_LIST_FILE, 'r')
-    version = int(trans_list.readline())
-    new_blocks = int(trans_list.readline())
-    
+    version = int(trans_list.readline())    # 1st line = transfer list version
+    new_blocks = int(trans_list.readline()) # 2nd line = total number of blocks
+
+    # version 2 introduced with android-5.1.0_r1
+    # skip next 2 lines. we don't need this stuff now
+    if version >= 2:
+        trans_list.readline()               # 3rd line = stash entries needed simultaneously
+        trans_list.readline()               # 4th line = number of blocks that will be stashed
+
     for line in trans_list:
-        line = line.split(' ')
+        line = line.split(' ')              # 5th & next lines should be only commands
         cmd = line[0]
         if 'erase' == cmd:
             erase_block_set = rangeset(line[1])
         elif 'new' == cmd:
             new_block_set = rangeset(line[1])
         else:
-            print ('Error command %s' % cmd)
-            trans_list.close()
-            sys.exit(1)
+            # skip lines starting with numbers, they're not commands anyway.
+            if not cmd[0].isdigit(): 
+                print ('No valid command: %s' % cmd)
+                trans_list.close()
+                sys.exit(1)
 
     trans_list.close()
     return version, new_blocks, erase_block_set, new_block_set 
@@ -66,7 +74,7 @@ def main(argv):
         block_count = end - begin
         print ("Reading %d blocks..." % block_count),
         data = new_data_file.read(block_count*BLOCK_SIZE)
-        print ("Writing to %d..." % begin),
+        print ("Writing to %d... " % begin, end=""),
         output_img.seek(begin*BLOCK_SIZE)
         output_img.write(data)
         print ("Done!")
