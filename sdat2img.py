@@ -3,7 +3,7 @@
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2015-03-28 14:51:44 CST
+#          DATE: 2015-03-29 14:22:03 CST
 #====================================================
 import sys, os
 
@@ -49,7 +49,7 @@ def parse_transfer_list_file(path):
         else:
             # skip lines starting with numbers, they're not commands anyway.
             if not cmd[0].isdigit(): 
-                print ('No valid command: %s' % cmd)
+                print ('No valid command: %s.' % cmd)
                 trans_list.close()
                 sys.exit(1)
 
@@ -64,7 +64,7 @@ def init_output_file_size(output_file_obj, erase_block_set):
 
 def main(argv):
     version, new_blocks, erase_block_set, new_block_set =  parse_transfer_list_file(TRANSFER_LIST_FILE)
-    output_img = open( OUTPUT_IMAGE_FILE, 'wb')
+    output_img = open(OUTPUT_IMAGE_FILE, 'wb')
     init_output_file_size(output_img, erase_block_set)
     new_data_file = open(NEW_DATA_FILE, 'rb')
 
@@ -72,15 +72,15 @@ def main(argv):
         begin = block[0]
         end = block[1]
         block_count = end - begin
-        print ("Reading %d blocks..." % block_count),
+        print ('Reading %d blocks...' % block_count),
         data = new_data_file.read(block_count*BLOCK_SIZE)
-        print ("Writing to %d... " % begin, end=""),
+        print ('Writing to %d...' % begin),
         output_img.seek(begin*BLOCK_SIZE)
         output_img.write(data)
-        print ("Done!")
 
     output_img.close()
     new_data_file.close()
+    print ('\nDone! Output image: %s' % os.path.realpath(output_img.name))
 
 if __name__ == "__main__":
     main(sys.argv)
