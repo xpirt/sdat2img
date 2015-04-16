@@ -11,10 +11,13 @@ try:
     TRANSFER_LIST_FILE = str(sys.argv[1])
     NEW_DATA_FILE = str(sys.argv[2])
     OUTPUT_IMAGE_FILE = str(sys.argv[3])
-except IndexError:  
+except IndexError:
    print ("\nsdat2img - usage is: \n\n      sdat2img <transfer_list> <system_new_file> <system_img>\n\n")
    print ("Visit xda thread for more information.\n")
-   os.system("pause")
+   try:
+       input = raw_input
+   except NameError: pass
+   input ("Press any key to exit\n")
    sys.exit()
 
 BLOCK_SIZE = 4096
@@ -48,13 +51,13 @@ def parse_transfer_list_file(path):
             new_block_set = rangeset(line[1])
         else:
             # skip lines starting with numbers, they're not commands anyway.
-            if not cmd[0].isdigit(): 
+            if not cmd[0].isdigit():
                 print ('No valid command: %s.' % cmd)
                 trans_list.close()
                 sys.exit(1)
 
     trans_list.close()
-    return version, new_blocks, erase_block_set, new_block_set 
+    return version, new_blocks, erase_block_set, new_block_set
 
 def init_output_file_size(output_file_obj, erase_block_set):
     max_block_num = max(pair[1] for pair in erase_block_set)
