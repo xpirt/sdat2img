@@ -3,8 +3,9 @@
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2015-03-29 14:22:03 CST
+#          DATE: 2015-07-08 17:54:09 CST
 #====================================================
+
 import sys, os
 
 try:
@@ -17,7 +18,7 @@ except IndexError:
    try:
        input = raw_input
    except NameError: pass
-   input ("Press any key to exit\n")
+   input ("Press any key to exit...\n")
    sys.exit()
 
 BLOCK_SIZE = 4096
@@ -75,9 +76,8 @@ def main(argv):
         begin = block[0]
         end = block[1]
         block_count = end - begin
-        print ('Reading %d blocks...' % block_count),
         data = new_data_file.read(block_count*BLOCK_SIZE)
-        print ('Writing to %d...' % begin),
+        print('Copying {} blocks into position {}...'.format(block_count, begin))
         output_img.seek(begin*BLOCK_SIZE)
         output_img.write(data)
 
