@@ -2,10 +2,10 @@
 #encoding:utf8
 #====================================================
 #          FILE: sdat2img.py
-#       AUTHORS: xpirt - luxi78 - howellzhu - joaormatos
-#          DATE: 2015-05-23 19:36:50 UTC
+#       AUTHORS: xpirt - luxi78 - howellzhu
+#          DATE: 2015-03-29 14:22:03 CST
 #====================================================
-import sys, os, errno
+import sys, os
 
 try:
     TRANSFER_LIST_FILE = str(sys.argv[1])
@@ -59,40 +59,27 @@ def parse_transfer_list_file(path):
     trans_list.close()
     return version, new_blocks, erase_block_set, new_block_set
 
+def init_output_file_size(output_file_obj, erase_block_set):
+    max_block_num = max(pair[1] for pair in erase_block_set)
+    output_file_obj.seek(max_block_num*BLOCK_SIZE - 1)
+    output_file_obj.write('\0'.encode('utf-8'))
+    output_file_obj.flush()
+
 def main(argv):
     version, new_blocks, erase_block_set, new_block_set =  parse_transfer_list_file(TRANSFER_LIST_FILE)
-
-    # Don't clobber existing files to avoid accidental data loss.
-    try:
-        output_img = open(OUTPUT_IMAGE_FILE, 'wxb')
-    except IOError as e:
-        if e.errno == errno.EEXIST:
-            print('Error: the output file "{}" already exists'.format(e.filename))
-            print('Remove it, rename it, or choose a different file name.')
-            sys.exit(e.errno)
-        else:
-            raise
-
+    output_img = open(OUTPUT_IMAGE_FILE, 'wb')
+    init_output_file_size(output_img, erase_block_set)
     new_data_file = open(NEW_DATA_FILE, 'rb')
-    max_file_size = max(pair[1] for pair in erase_block_set)*BLOCK_SIZE
 
     for block in new_block_set:
         begin = block[0]
         end = block[1]
         block_count = end - begin
-        print('Copying {} blocks into position {}...'.format(block_count, begin))
-
-        # Position output file.
+        print ('Reading %d blocks...' % block_count),
+        data = new_data_file.read(block_count*BLOCK_SIZE)
+        print ('Writing to %d...' % begin),
         output_img.seek(begin*BLOCK_SIZE)
-
-        # Copy one block at a time.
-        while(block_count > 0):
-            output_img.write(new_data_file.read(BLOCK_SIZE))
-            block_count -= 1
-
-    # Make file larger if necessary
-    if(output_img.tell() < max_file_size):
-        output_img.truncate(max_file_size)
+        output_img.write(data)
 
     output_img.close()
     new_data_file.close()
