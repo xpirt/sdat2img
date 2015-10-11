@@ -3,7 +3,7 @@
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2015-10-11 14:25:44 CST
+#          DATE: 2015-10-11 16:33:32 CST
 #====================================================
 
 import sys, os
@@ -50,12 +50,13 @@ def parse_transfer_list_file(path):
     for line in trans_list:
         line = line.split(' ')              # 5th & next lines should be only commands
         cmd = line[0]
-        if 'new' == cmd:
-            new_block_set = rangeset(line[1])
-        elif 'zero' == cmd:
-            zero_block_set = rangeset(line[1])
-        elif 'erase' == cmd:
+        if cmd == 'erase':
             erase_block_set = rangeset(line[1])
+        elif cmd == 'new':
+            new_block_set = rangeset(line[1])
+        elif cmd == 'zero':
+            # skip zero command, added on android-6.0.0_r1 but useless while decompressing
+            print ('Skipping %s' % cmd + ' command.')
         else:
             # skip lines starting with numbers, they're not commands anyway.
             if not cmd[0].isdigit():
@@ -64,7 +65,7 @@ def parse_transfer_list_file(path):
                 sys.exit(1)
 
     trans_list.close()
-    return version, new_blocks, new_block_set, zero_block_set, erase_block_set
+    return version, new_blocks, erase_block_set, new_block_set
 
 def init_output_file_size(output_file_obj, erase_block_set):
     max_block_num = max(pair[1] for pair in erase_block_set)
@@ -73,7 +74,7 @@ def init_output_file_size(output_file_obj, erase_block_set):
     output_file_obj.flush()
 
 def main(argv):
-    version, new_blocks, new_block_set, zero_block_set, erase_block_set =  parse_transfer_list_file(TRANSFER_LIST_FILE)
+    version, new_blocks, erase_block_set, new_block_set =  parse_transfer_list_file(TRANSFER_LIST_FILE)
     output_img = open(OUTPUT_IMAGE_FILE, 'wb')
     init_output_file_size(output_img, erase_block_set)
     new_data_file = open(NEW_DATA_FILE, 'rb')
