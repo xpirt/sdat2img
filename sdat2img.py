@@ -52,7 +52,7 @@ def parse_transfer_list_file(path):
             new_block_set = rangeset(line[1])
         else:
             # skip lines starting with numbers, they're not commands anyway.
-            if not cmd[0].isdigit():
+            if cmd[0].isdigit():
                 print ('No valid command: %s.' % cmd)
                 trans_list.close()
                 sys.exit(1)
