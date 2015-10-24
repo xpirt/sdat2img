@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#encoding:utf8
+# -*- coding: utf-8 -*-
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
