@@ -114,7 +114,7 @@ def main(argv):
 
     output_img.close()
     new_data_file.close()
-    print('nDone! Output image: %s' % os.path.realpath(output_img.name))
+    print('\nDone! Output image: %s' % os.path.realpath(output_img.name))
 
 if __name__ == '__main__':
     main(sys.argv)
