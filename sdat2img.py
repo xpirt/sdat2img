@@ -3,78 +3,92 @@
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2015-10-11 16:33:32 CST
+#          DATE: 2016-07-23 10:59:46 CST
 #====================================================
 
-import sys, os
+import sys, os, errno
 
 try:
     TRANSFER_LIST_FILE = str(sys.argv[1])
     NEW_DATA_FILE = str(sys.argv[2])
+except IndexError:
+    print('\nUsage: sdat2img.py <transfer_list> <system_new_file> [system_img]\n')
+    print('    <transfer_list>: transfer list file')
+    print('    <system_new_file>: system new dat file')
+    print('    [system_img]: output system image\n\n')
+    print('Visit xda thread for more information.\n')
+    try:
+       input = raw_input
+    except NameError: pass
+    input('Press ENTER to exit...')
+    sys.exit()
+
+try:
     OUTPUT_IMAGE_FILE = str(sys.argv[3])
 except IndexError:
-   print ("\nsdat2img - usage is: \n\n      sdat2img <transfer_list> <system_new_file> <system_img>\n\n")
-   print ("Visit xda thread for more information.\n")
-   try:
-       input = raw_input
-   except NameError: pass
-   input ("Press ENTER to exit...\n")
-   sys.exit()
-
+    OUTPUT_IMAGE_FILE = 'system.img'
+    
 BLOCK_SIZE = 4096
 
 def rangeset(src):
     src_set = src.split(',')
     num_set =  [int(item) for item in src_set]
     if len(num_set) != num_set[0]+1:
-        print ('Error on parsing following data to rangeset:\n%s' % src)
+        print('Error on parsing following data to rangeset:\n%s' % src)
         sys.exit(1)
 
     return tuple ([ (num_set[i], num_set[i+1]) for i in range(1, len(num_set), 2) ])
 
 def parse_transfer_list_file(path):
     trans_list = open(TRANSFER_LIST_FILE, 'r')
-    version = int(trans_list.readline())    # 1st line = transfer list version
-    new_blocks = int(trans_list.readline()) # 2nd line = total number of blocks
 
-    # system.transfer.list:
-    #   - version 1: android-5.0.0_r1
-    #   - version 2: android-5.1.0_r1
-    #   - version 3: android-6.0.0_r1
+    # Transfer list file version
+    #   - version 1: android 5.0.x
+    #   - version 2: android 5.1.x
+    #   - version 3: android 6.0.x
+    version = int(trans_list.readline())
 
-    # skip next 2 lines. we don't need this stuff now
+    # Total number of blocks
+    new_blocks = int(trans_list.readline())
+
+    # Skip next 2 lines, we don't need that stuff now
     if version >= 2:
-        trans_list.readline()               # 3rd line = stash entries needed simultaneously
-        trans_list.readline()               # 4th line = number of blocks that will be stashed
+        trans_list.readline()
+        trans_list.readline()
 
     commands = []
     for line in trans_list:
-        line = line.split(' ')              # 5th & next lines should be only commands
+        line = line.split(' ')
         cmd = line[0]
         if cmd in ['erase', 'new', 'zero']:
             commands.append([cmd, rangeset(line[1])])
         else:
-            # skip lines starting with numbers, they're not commands anyway.
+            # Skip lines starting with numbers, they are not commands anyway
             if not cmd[0].isdigit():
-                print ('No valid command: %s.' % cmd)
+                print('Command "%s" is not valid.' % cmd)
                 trans_list.close()
                 sys.exit(1)
 
     trans_list.close()
     return version, new_blocks, commands
 
-def init_output_file_size(output_file_obj, commands):
-    all_block_sets = [i for command in commands for i in command[1]]
-    max_block_num = max(pair[1] for pair in all_block_sets)
-    output_file_obj.seek(max_block_num*BLOCK_SIZE - 1)
-    output_file_obj.write('\0'.encode('utf-8'))
-    output_file_obj.flush()
-
 def main(argv):
     version, new_blocks, commands = parse_transfer_list_file(TRANSFER_LIST_FILE)
-    output_img = open(OUTPUT_IMAGE_FILE, 'wb')
-    init_output_file_size(output_img, commands)
+    
+    # Don't clobber existing files to avoid accidental data loss
+    try:
+        output_img = open(OUTPUT_IMAGE_FILE, 'wb')
+    except IOError as e:
+        if e.errno == errno.EEXIST:
+            print('Error: the output file "{}" already exists'.format(e.filename))
+            print('Remove it, rename it, or choose a different file name.')
+            sys.exit(e.errno)
+        else:
+            raise
+
     new_data_file = open(NEW_DATA_FILE, 'rb')
+    all_block_sets = [i for command in commands for i in command[1]]
+    max_file_size = max(pair[1] for pair in all_block_sets)*BLOCK_SIZE
 
     for command in commands:
         if command[0] == 'new':
@@ -82,16 +96,25 @@ def main(argv):
                 begin = block[0]
                 end = block[1]
                 block_count = end - begin
-                data = new_data_file.read(block_count*BLOCK_SIZE)
                 print('Copying {} blocks into position {}...'.format(block_count, begin))
+
+                # Position output file
                 output_img.seek(begin*BLOCK_SIZE)
-                output_img.write(data)
+                
+                # Copy one block at a time
+                while(block_count > 0):
+                    output_img.write(new_data_file.read(BLOCK_SIZE))
+                    block_count -= 1
         else:
             print('Skipping command %s' % command[0])
 
+    # Make file larger if necessary
+    if(output_img.tell() < max_file_size):
+        output_img.truncate(max_file_size)
+
     output_img.close()
     new_data_file.close()
-    print ('\nDone! Output image: %s' % os.path.realpath(output_img.name))
+    print('nDone! Output image: %s' % os.path.realpath(output_img.name))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main(sys.argv)
