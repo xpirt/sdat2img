@@ -12,11 +12,11 @@ It currently supports Windows x86/x64, Linux x86/x64 & arm/arm64 architectures.
 
 ## Usage
 ```
-sdat2img.py <transfer_list> <system_new_file> <system_ext4>
+sdat2img.py <transfer_list> <system_new_file> [system_img]
 ```
-- `transfer_list` = input, system.transfer.list from rom zip
-- `system_new_file` = input, system.new.dat from rom zip
-- `system_ext4` = output ext4 raw image file
+- `<transfer_list>` = input, system.transfer.list from rom zip
+- `<system_new_file>` = input, system.new.dat from rom zip
+- `[system_img]` = output ext4 raw image file
 
 
 
