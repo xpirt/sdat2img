@@ -3,7 +3,7 @@
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2016-07-23 10:59:46 CST
+#          DATE: 2016-09-22 17:44:06 CST
 #====================================================
 
 import sys, os, errno
@@ -42,20 +42,19 @@ def rangeset(src):
 def parse_transfer_list_file(path):
     trans_list = open(TRANSFER_LIST_FILE, 'r')
 
-    # Transfer list file version
-    #   - version 1: android 5.0.x
-    #   - version 2: android 5.1.x
-    #   - version 3: android 6.0.x
+    # First line in transfer list is the version number
     version = int(trans_list.readline())
 
-    # Total number of blocks
+    # Second line in transfer list is the total number of blocks we expect to write
     new_blocks = int(trans_list.readline())
 
-    # Skip next 2 lines, we don't need that stuff now
     if version >= 2:
+        # Third line is how many stash entries are needed simultaneously
         trans_list.readline()
+        # Fourth line is the maximum number of blocks that will be stashed simultaneously
         trans_list.readline()
 
+    # Subsequent lines are all individual transfer commands
     commands = []
     for line in trans_list:
         line = line.split(' ')
@@ -74,7 +73,19 @@ def parse_transfer_list_file(path):
 
 def main(argv):
     version, new_blocks, commands = parse_transfer_list_file(TRANSFER_LIST_FILE)
-    
+
+    print('\nDetected system version: ', end=''),
+    if version == 1:
+        print('Android Lollipop 5.0\n')
+    elif version == 2:
+        print('Android Lollipop 5.1\n')
+    elif version == 3:
+        print('Android Marshmallow 6.0\n')
+    elif version == 4:
+        print('Android Nougat 7.0\n')
+    else:
+        print('Unknown\n')
+
     # Don't clobber existing files to avoid accidental data loss
     try:
         output_img = open(OUTPUT_IMAGE_FILE, 'wb')
@@ -96,7 +107,7 @@ def main(argv):
                 begin = block[0]
                 end = block[1]
                 block_count = end - begin
-                print('Copying {} blocks into position {}...'.format(block_count, begin))
+                print('\t\rCopying {} blocks into position {}...'.format(block_count, begin), end='', flush=True),
 
                 # Position output file
                 output_img.seek(begin*BLOCK_SIZE)
@@ -106,7 +117,7 @@ def main(argv):
                     output_img.write(new_data_file.read(BLOCK_SIZE))
                     block_count -= 1
         else:
-            print('Skipping command %s' % command[0])
+            print('Skipping command %s...' % command[0], end='\t\t\t\t\r', flush=True),
 
     # Make file larger if necessary
     if(output_img.tell() < max_file_size):
@@ -114,7 +125,7 @@ def main(argv):
 
     output_img.close()
     new_data_file.close()
-    print('\nDone! Output image: %s' % os.path.realpath(output_img.name))
+    print('Done! Output image: %s' % os.path.realpath(output_img.name))
 
 if __name__ == '__main__':
     main(sys.argv)
