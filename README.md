@@ -4,7 +4,7 @@ Convert sparse Android data image (.dat) into filesystem ext4 image (.img)
 
 
 ## Requirements
-This binary requires Python 3.x installed on your system.
+This binary requires Python 2.7 or newer installed on your system.
 
 It currently supports Windows x86/x64, Linux x86/x64 & arm/arm64 architectures.
 
