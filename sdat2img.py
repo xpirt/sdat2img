@@ -1,12 +1,24 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2016-09-22 17:44:06 CST
+#          DATE: 2016-11-23 16:20:11 CST
 #====================================================
 
 import sys, os, errno
+
+__version__ = '1.0'
+
+if sys.hexversion < 0x02070000:
+    print >> sys.stderr, "Python 2.7 or newer is required."
+    try:
+       input = raw_input
+    except NameError: pass
+    input('Press ENTER to exit...')
+    sys.exit(1)
+else:
+    print('sdat2img binary - version: %s\n' % __version__)
 
 try:
     TRANSFER_LIST_FILE = str(sys.argv[1])
@@ -27,7 +39,7 @@ try:
     OUTPUT_IMAGE_FILE = str(sys.argv[3])
 except IndexError:
     OUTPUT_IMAGE_FILE = 'system.img'
-    
+
 BLOCK_SIZE = 4096
 
 def rangeset(src):
@@ -74,17 +86,16 @@ def parse_transfer_list_file(path):
 def main(argv):
     version, new_blocks, commands = parse_transfer_list_file(TRANSFER_LIST_FILE)
 
-    print('\nDetected system version: ', end=''),
     if version == 1:
-        print('Android Lollipop 5.0\n')
+        print('Android Lollipop 5.0 detected!\n')
     elif version == 2:
-        print('Android Lollipop 5.1\n')
+        print('Android Lollipop 5.1 detected!\n')
     elif version == 3:
-        print('Android Marshmallow 6.0\n')
+        print('Android Marshmallow 6.0 detected!\n')
     elif version == 4:
-        print('Android Nougat 7.0\n')
+        print('Android Nougat 7.0 detected!\n')
     else:
-        print('Unknown\n')
+        print('Unknown Android version!\n')
 
     # Don't clobber existing files to avoid accidental data loss
     try:
@@ -107,7 +118,7 @@ def main(argv):
                 begin = block[0]
                 end = block[1]
                 block_count = end - begin
-                print('\t\rCopying {} blocks into position {}...'.format(block_count, begin), end='', flush=True),
+                print('Copying {} blocks into position {}...'.format(block_count, begin))
 
                 # Position output file
                 output_img.seek(begin*BLOCK_SIZE)
@@ -117,7 +128,7 @@ def main(argv):
                     output_img.write(new_data_file.read(BLOCK_SIZE))
                     block_count -= 1
         else:
-            print('Skipping command %s...' % command[0], end='\t\t\t\t\r', flush=True),
+            print('Skipping command %s...' % command[0])
 
     # Make file larger if necessary
     if(output_img.tell() < max_file_size):
