@@ -93,7 +93,7 @@ def main(argv):
     elif version == 3:
         print('Android Marshmallow 6.0 detected!\n')
     elif version == 4:
-        print('Android Nougat 7.0 detected!\n')
+        print('Android Nougat 7.0/7.1.x detected!\n')
     else:
         print('Unknown Android version!\n')
 
