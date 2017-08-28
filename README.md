@@ -28,5 +28,10 @@ This is a simple example on a Linux system:
 
 
 
+## OTAs
+If you are looking on decompressing `system.patch.dat` file or `.p` files, therefore reproduce the patching system on your PC, check [imgpatchtools](https://github.com/erfanoabdi/imgpatchtools) out by @erfanoabdi.
+
+
+
 ## Info
 For more information about this binary, visit http://forum.xda-developers.com/android/software-hacking/how-to-conver-lollipop-dat-files-to-t2978952.
