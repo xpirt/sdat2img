@@ -6,7 +6,7 @@ Convert sparse Android data image (.dat) into filesystem ext4 image (.img)
 ## Requirements
 This binary requires Python 2.7 or newer installed on your system.
 
-It currently supports Windows x86/x64, Linux x86/x64 & arm/arm64 architectures.
+It currently supports Windows, Linux, MacOS & ARM architectures.
 
 
 
@@ -16,7 +16,7 @@ sdat2img.py <transfer_list> <system_new_file> [system_img]
 ```
 - `<transfer_list>` = input, system.transfer.list from rom zip
 - `<system_new_file>` = input, system.new.dat from rom zip
-- `[system_img]` = output ext4 raw image file
+- `[system_img]` = output ext4 raw image file (optional)
 
 
 
