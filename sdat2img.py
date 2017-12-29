@@ -79,7 +79,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
 
     # Don't clobber existing files to avoid accidental data loss
     try:
-        output_img = open(OUTPUT_IMAGE_FILE, 'wb')
+        output_img = open(OUTPUT_IMAGE_FILE, 'wbx')
     except IOError as e:
         if e.errno == errno.EEXIST:
             print('Error: the output file "{}" already exists'.format(e.filename))
