@@ -3,13 +3,13 @@
 #====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
-#          DATE: 2017-01-04 2:01:45 CEST
+#          DATE: 2018-05-25 10:49:35 CEST
 #====================================================
 
 import sys, os, errno
 
 def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
-    __version__ = '1.0'
+    __version__ = '1.1'
 
     if sys.hexversion < 0x02070000:
         print >> sys.stderr, "Python 2.7 or newer is required."
