@@ -138,6 +138,6 @@ if __name__ == '__main__':
     try:
         OUTPUT_IMAGE_FILE = str(sys.argv[3])
     except IndexError:
-        OUTPUT_IMAGE_FILE = 'system.img'
+        OUTPUT_IMAGE_FILE = NEW_DATA_FILE.rsplit('.', 1)[0] + '.img'
 
     main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE)
