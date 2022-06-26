@@ -74,7 +74,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     elif version == 3:
         print('Android Marshmallow 6.x detected!\n')
     elif version == 4:
-        print('Android Nougat 7.x / Oreo 8.x detected!\n')
+        print('Android Nougat 7.0 or later detected!\n')
     else:
         print('Unknown Android version!\n')
 
