@@ -7,7 +7,8 @@
 #====================================================
 
 from __future__ import print_function
-import sys, os, errno
+import sys, os, errno, tempfile
+import brotli
 
 def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     __version__ = '1.2'
@@ -89,7 +90,20 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
         else:
             raise
 
-    new_data_file = open(NEW_DATA_FILE, 'rb')
+    original_brotli = False
+    target_data_file = NEW_DATA_FILE
+    if target_data_file.endswith('.br'):
+        original_brotli = True
+        print("Decompressing {} with brotli".format(target_data_file))
+        with open(target_data_file, 'rb') as infile:
+            data = infile.read()
+        data = brotli.decompress(data)
+
+        tmp = tempfile.NamedTemporaryFile(delete=False)
+        tmp.write(data)
+        target_data_file = tmp.name
+
+    new_data_file = open(target_data_file, 'rb')
     all_block_sets = [i for command in commands for i in command[1]]
     max_file_size = max(pair[1] for pair in all_block_sets)*BLOCK_SIZE
 
@@ -117,6 +131,9 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
 
     output_img.close()
     new_data_file.close()
+    if original_brotli:
+        os.unlink(target_data_file)
+
     print('Done! Output image: {}'.format(os.path.realpath(output_img.name)))
 
 if __name__ == '__main__':
