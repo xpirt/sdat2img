@@ -89,6 +89,10 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
         else:
             raise
 
+    if NEW_DATA_FILE.split(".")[-1] =="br":
+        print("Error: the <system_new_file> is in brotli (.br) format. Decompress using brotli then use .dat format.")
+        exit(0)
+
     new_data_file = open(NEW_DATA_FILE, 'rb')
     all_block_sets = [i for command in commands for i in command[1]]
     max_file_size = max(pair[1] for pair in all_block_sets)*BLOCK_SIZE
